@@ -2,8 +2,9 @@
 
 {% block content %}
     <h1>Edytuj</h1>
-    <form method="POST" class="product-form">{% csrf_token %}
-        {{ product.as_p }}
+    <form method="POST" class="product-form">
+        {% csrf_token %}
+        {{ form.as_p }}
         <button type="submit" name="save">Save</button>
     </form>
 {% endblock %}

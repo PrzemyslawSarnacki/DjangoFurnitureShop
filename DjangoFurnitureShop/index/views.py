@@ -53,9 +53,8 @@ def new_product(request):
 
 def edit_product(request, pk):
     product = get_object_or_404(Product, pk=pk)
-    users = User.objects.all()
     if request.method == "POST":
-        form = ProductForm(request.POST, instance=product)
+        form = ProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
             product = form.save(commit=False)
             product.manufacturer = request.user
@@ -64,7 +63,7 @@ def edit_product(request, pk):
             return redirect('product_details', pk=product.pk)
     else:
         form = ProductForm(instance=product)
-    return render(request, 'index/edit_product.html', {'product': product, 'users': users})
+    return render(request, 'index/edit_product.html', {'form': form})
 
 def delete_product(request, pk):
     product = get_object_or_404(Product, pk=pk)
