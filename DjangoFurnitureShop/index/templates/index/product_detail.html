@@ -6,19 +6,16 @@
     </ul>
     
     {% if user == product.manufacturer %}
-         		<a class="btn btn-default" href="{% url 'product_edit' pk=product.pk %}">
-                    <span class="glyphicon glyphicon-pencil"></span></a>
-         		<a class="btn btn-default" href="{% url 'product_delete' pk=product.pk %}">
-                    <span class="glyphicon glyphicon-trash"></span></a>
+         		<h1>To twój produkt</h1>
             {%endif %}
         <div class="product">
             <h1>{{ produt.name }}</h1>
             <h4>{{ product.manufacturer }}</h4>
-            <p>{{ product.description|linebreaksbr }}</p>
-            <h6><div class="date">
-                    {{ product.created_date }}
-                </div></h6>
-            <!-- <img src="{{ product.photo.url}}"> -->
+                <h6><div class="date">
+                        {{ product.created_date }}
+                    </div></h6>
+                    <img src="{{ product.photo.url}}">
+                    <p>{{ product.description|linebreaksbr }}</p>
             <b><p>{{ product.price|linebreaksbr }} zł</p></b>
             <button>Dodaj do koszyka</button>
         </div>
