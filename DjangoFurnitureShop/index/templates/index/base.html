@@ -1,0 +1,22 @@
+{% load staticfiles %}
+<html>
+    <head>
+        <title>Django Furniture Shop</title>
+    </head>
+    <body>
+    <div class="page-header">
+        <h1><a href="/">Furniture Shop</a></h1>
+        <ul class="menu">
+         =
+        </ul>
+    </div>
+    <div class="content container">
+        <div class="row">
+            <div class="col-md-8">
+            {% block content %}
+            {% endblock %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

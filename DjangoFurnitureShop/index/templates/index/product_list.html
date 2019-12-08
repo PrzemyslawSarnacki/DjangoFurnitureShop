@@ -1,0 +1,21 @@
+{% extends 'index/base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+	<ul class="user">
+	</ul>
+    {% for product in products %}
+    <article>
+        <div class="product">
+            <h1><a href="{% url 'product_detail' pk=product.pk %}">{{ product.name }}</a></h1>
+            <h4>{{ product.manufacturer }}</h4>
+            <h6><div class="date">
+                    {{ product.created_date }}
+                </div></h6>
+            <!-- <img src="{{ product.photo.url}}"> -->
+            <b><p>{{ product.price|linebreaksbr }} zł</p></b>
+            <button>Dodaj do koszyka</button>
+        </div>
+    </article>
+    {% endfor %}
+{% endblock %}
