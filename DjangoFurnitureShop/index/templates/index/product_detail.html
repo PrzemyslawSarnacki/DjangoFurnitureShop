@@ -1,10 +1,16 @@
 {% extends 'index/base.html' %}
 {% load staticfiles %}
+{% load group_tag %}
 
 {% block content %}
 	<ul class="user">
-    </ul>
-    
+    </ul> 
+    {% if request.user|group_tag:"Provider"  %}
+        <button><a href="{% url 'new_product' %}">New</a></button>
+        <button><a href="{% url 'edit_product' pk=product.pk %}">Edit</a></button>
+        <button><a href="{% url 'delete_product' pk=product.pk %}">Delete</a></button>
+    {% endif %}
+
     {% if user == product.manufacturer %}
          		<h1>To twój produkt</h1>
             {%endif %}
@@ -14,7 +20,9 @@
                 <h6><div class="date">
                         {{ product.created_date }}
                     </div></h6>
-                    <img src="{{ product.photo.url}}">
+                    {% if product.photo %}
+                        <img src="{{ product.photo.url}}">
+                    {% endif %}
                     <p>{{ product.description|linebreaksbr }}</p>
             <b><p>{{ product.price|linebreaksbr }} zł</p></b>
             <button>Dodaj do koszyka</button>
