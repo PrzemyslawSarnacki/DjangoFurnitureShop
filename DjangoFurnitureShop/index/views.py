@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from django.db.models import Q
 from django.utils import timezone
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.models import User
 from .models import Product, Comment
 from .forms import ProductForm, CommentForm
@@ -12,7 +13,10 @@ from django.views.decorators.csrf import csrf_protect
 def product_list(request):
     search_phrase = ''
     search_manufacturer = ''
-    products = Product.objects.all()
+    products = Product.objects.all() 
+    paginator = Paginator(products, 3)
+    page = request.GET.get('page')
+    products = paginator.get_page(page)
     users = User.objects.all()
     if 'search' in request.GET:
         search_phrase = request.GET['search']
