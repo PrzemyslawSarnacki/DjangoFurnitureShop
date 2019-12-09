@@ -1,0 +1,10 @@
+{% extends 'index/base.html' %}
+
+{% block content %}
+    <h1>Edytuj</h1>
+    <form method="POST" class="product-form">
+        {% csrf_token %}
+        <h2>Do you really want to delete product with name "{{product.name}}"?</h2>
+        <p><input type="sumbit" value="Yes"><a href="../">Cancel</a></p>
+    </form>
+{% endblock %}

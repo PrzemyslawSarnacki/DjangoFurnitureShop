@@ -11,7 +11,7 @@ urlpatterns = [
     # re_path(r'^search/$', views.search, name='search'),
     path('new_product/', views.new_product, name='new_product'),
     path('edit_product/<pk>/', views.edit_product, name='edit_product'),
-    path('delete_product/<pk>/', views.delete_product, name='delete_product'),
+    path('product_detail/<pk>/delete_product/', views.delete_product, name='delete_product'),
     path('<int:id>', views.product_list, name=''),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

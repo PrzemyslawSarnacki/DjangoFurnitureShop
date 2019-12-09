@@ -66,5 +66,6 @@ def edit_product(request, pk):
 
 def delete_product(request, pk):
     product = get_object_or_404(Product, pk=pk)
-    product.delete()
-    return redirect('/')
+    if request.method == 'POST':
+        product.delete()
+    return render(request, 'index/delete_product.html', {'product': product})
