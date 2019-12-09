@@ -69,3 +69,18 @@ def delete_product(request, pk):
     if request.method == 'POST':
         product.delete()
     return render(request, 'index/delete_product.html', {'product': product})
+
+def add_to_cart(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    order_product = OrderProduct.objects.create(product=product)
+    order_qs = Order.objects.filter(user=request.user, ordered=False)
+    if order_qs.exists():
+        order = order_qs[0]
+        if order.products.filter(product__pk=product.pk).exists():
+            order_product.quantity += 1
+            order_product.save()
+        else:
+            order = Order.objects.create(user=request.user)
+            order.products.add(order_product)
+    return render(request, 'index/delete_product.html', {'product': product})
+

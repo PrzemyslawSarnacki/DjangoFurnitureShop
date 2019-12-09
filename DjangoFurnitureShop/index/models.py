@@ -1,3 +1,4 @@
+from django.conf import settings 
 from django.db import models
 from django.utils import timezone
 
@@ -34,17 +35,33 @@ class Comment(models.Model):
 		return self.text
 
 
+class OrderProduct(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE)
+    ordered = models.BooleanField(default=False)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=1)
+
+    def __str__(self):
+        return f"{self.quantity} of {self.product.name}"
+
+    def get_total_price(self):
+        return self.quantity * self.product.price
+
+
 
 class Order(models.Model):
-    client = models.CharField(max_length=200)
-    products_dictionary = { 
-        "product" : "",
-        "price" : ""
-    }
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                            on_delete=models.CASCADE)
+    products = models.ManyToManyField(OrderProduct)
     # list_of_products = models.DictWrapper(products_dictionary)
-    sale_date = models.DateField() 
+    ordered_date = models.DateTimeField(auto_now_add=True)
+    ordered = models.BooleanField(default=False)
+    shipping_address = models.ForeignKey(
+        'UserAddress', related_name='shipping_address', on_delete=models.SET_NULL, blank=True, null=True)
+    sale_date = models.DateField(auto_now_add=True)
     payment_deadline = models.DateField()
-    total_price = models.FloatField()
+    # total_price = models.FloatField()
 
 
 class User(models.Model):
@@ -55,7 +72,7 @@ class User(models.Model):
     email = models.CharField(max_length=30)
 
 
-class User_Address(models.Model):
+class UserAddress(models.Model):
     username = models.CharField(max_length=10)
     company_name = models.CharField(max_length=20)
     name = models.CharField(max_length=30)
@@ -65,3 +82,4 @@ class User_Address(models.Model):
     house_unit_number = models.CharField(max_length=30)
     post_code = models.CharField(max_length=30)
     city = models.CharField(max_length=30)
+
