@@ -19,16 +19,16 @@ class CommentForm(forms.ModelForm):
         model = Comment
         fields = ('author', 'text')
 
-class CheckoutForm(forms.Form):
-    company_name = forms.CharField(max_length=20)
+class CheckoutForm(forms.ModelForm):
+    company_name = forms.CharField(max_length=20, required=False)
     name = forms.CharField(max_length=30)
     surname = forms.CharField(max_length=30)
     street = forms.CharField(max_length=30)
     house_number = forms.CharField(max_length=30)
-    house_unit_number = forms.CharField(max_length=30)
+    house_unit_number = forms.CharField(max_length=30, required=False)
     post_code = forms.CharField(max_length=30)
     city = forms.CharField(max_length=30)
     
     class Meta:
         model = UserAddress
-        fields = ('author', 'text')
+        fields = ('company_name', 'name', 'surname', 'street', 'house_number', 'house_unit_number', 'post_code', 'city')

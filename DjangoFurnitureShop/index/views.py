@@ -15,7 +15,7 @@ from django.views.decorators.csrf import csrf_protect
 def product_list(request):
     search_phrase = ''
     search_manufacturer = ''
-    products = Product.objects.all() 
+    products = Product.objects.all()
     paginator = Paginator(products, 3)
     page = request.GET.get('page')
     products = paginator.get_page(page)
@@ -28,17 +28,22 @@ def product_list(request):
             products = products.filter(name__icontains=search_phrase)
     if 'search_manufacturer' in request.GET:
         search_manufacturer = request.GET['search_manufacturer']
-        products = products.filter(manufacturer_id__username=search_manufacturer)
-    context = {'products': products, 'users': users, 'search_phrase': search_phrase, 'search_manufacturer': search_manufacturer}
+        products = products.filter(
+            manufacturer_id__username=search_manufacturer)
+    context = {'products': products, 'users': users,
+               'search_phrase': search_phrase, 'search_manufacturer': search_manufacturer}
     return render(request, 'index/product_list.html', context)
 
+
 def a_product_list(request, pk):
-	products = Product.objects.filter(manufacturer=pk)
-	return render(request, 'index/a_product_list.html', {'products': products})
+    products = Product.objects.filter(manufacturer=pk)
+    return render(request, 'index/a_product_list.html', {'products': products})
+
 
 def product_detail(request, pk):
     product = get_object_or_404(Product, pk=pk)
     return render(request, 'index/product_detail.html', {'product': product})
+
 
 def new_product(request):
     if request.method == 'POST':
@@ -49,6 +54,7 @@ def new_product(request):
     else:
         product = ProductForm()
     return render(request, 'index/new_product.html', {'product': product})
+
 
 def edit_product(request, pk):
     product = get_object_or_404(Product, pk=pk)
@@ -64,18 +70,22 @@ def edit_product(request, pk):
         form = ProductForm(instance=product)
     return render(request, 'index/edit_product.html', {'form': form})
 
+
 def delete_product(request, pk):
     product = get_object_or_404(Product, pk=pk)
     if request.method == 'POST':
         product.delete()
     return render(request, 'index/delete_product.html', {'product': product})
 
+
 def add_to_cart(request, pk):
     product = get_object_or_404(Product, pk=pk)
     try:
-        order_product = OrderProduct.objects.get(product=product, user=request.user, ordered=False)
+        order_product = OrderProduct.objects.get(
+            product=product, user=request.user, ordered=False)
     except ObjectDoesNotExist:
-        order_product = OrderProduct.objects.create(product=product, user=request.user, ordered=False)
+        order_product = OrderProduct.objects.create(
+            product=product, user=request.user, ordered=False)
     try:
         order = Order.objects.get(user=request.user, ordered=False)
         if order.products.filter(product__pk=product.pk).exists():
@@ -95,6 +105,7 @@ def add_to_cart(request, pk):
         messages.info(request, "Dodano do koszyka.")
         return(redirect('order_summary'))
 
+
 def order_summary(request):
     if request.method == "GET":
         try:
@@ -105,26 +116,40 @@ def order_summary(request):
             messages.warning(request, "Nie masz aktywnego zamówienia !")
             return redirect("/")
 
+
 def checkout(request):
     if request.method == "GET":
         try:
             order = Order.objects.get(user=request.user, ordered=False)
-            form = CheckoutForm()
-            context = {
-                'form': form,
-                'order': order,
-            }
-
             shipping_address_qs = UserAddress.objects.filter(
                 user=request.user,
             )
             if shipping_address_qs.exists():
+                form = CheckoutForm(initial={
+                    'company_name': shipping_address_qs[0].company_name,
+                    'name': shipping_address_qs[0].name,
+                    'surname': shipping_address_qs[0].surname,
+                    'street': shipping_address_qs[0].street,
+                    'house_number': shipping_address_qs[0].house_number,
+                    'house_unit_number': shipping_address_qs[0].house_unit_number,
+                    'post_code': shipping_address_qs[0].post_code,
+                    'city': shipping_address_qs[0].city
+                })
+                context = {
+                    'form': form,
+                    'order': order,
+                }
                 context.update(
                     {'default_shipping_address': shipping_address_qs[0]})
-
+            else:
+                form = CheckoutForm()
+                context = {
+                    'form': form,
+                    'order': order,
+                }
             return render(request, "index/checkout.html", context)
         except ObjectDoesNotExist:
-            messages.info(request, "You do not have an active order")
+            messages.info(request, "Nie masz żadnego zamówienia")
             return redirect('/')
     if request.method == "POST":
         form = CheckoutForm(request.POST or None)
@@ -137,7 +162,6 @@ def checkout(request):
                     print("Using the defualt shipping address")
                     address_qs = UserAddress.objects.filter(
                         user=request.user,
-                        address_type='S',
                     )
                     if address_qs.exists():
                         shipping_address = address_qs[0]
@@ -180,19 +204,18 @@ def checkout(request):
                         messages.info(
                             request, "Please fill in the required shipping address fields")
 
-
-
         except ObjectDoesNotExist:
             messages.warning(request, "You do not have an active order")
             return redirect("order_summary")
 
 
 def remove_from_cart(request, pk):
-    product = get_object_or_404(Product, pk=pk)   
+    product = get_object_or_404(Product, pk=pk)
     try:
         order = Order.objects.get(user=request.user, ordered=False)
         try:
-            order_product = OrderProduct.objects.get(product=product, user=request.user, ordered=False)
+            order_product = OrderProduct.objects.get(
+                product=product, user=request.user, ordered=False)
             order.products.remove(order_product)
             messages.info(request, 'Produkt usunięty z koszyka')
             return redirect('order_summary')
@@ -203,9 +226,10 @@ def remove_from_cart(request, pk):
         messages.info(request, 'Koszyk jest pusty')
         return redirect('product_detail', pk=pk)
 
+
 def remove_single_product_from_cart(request, pk):
     product = get_object_or_404(Product, pk=pk)
-    try :
+    try:
         order = Order.objects.get(
             user=request.user,
             ordered=False

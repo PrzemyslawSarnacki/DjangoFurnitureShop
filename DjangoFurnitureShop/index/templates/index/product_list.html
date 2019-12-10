@@ -4,61 +4,84 @@
 
 {% block content %}
 
-          <form class="form-inline my-2 my-lg-1">
+          <form class="form-inline my-2 my-lg-1 mt-2">
                 <input 
-                class="form-control mr-sm-2"    
+                class="form-control mr-sm-2 mb-2 mt-2"    
                 type="search"
                 placeholder="Search"
                 aria-label="Search"
                 name="search"
                 value="{{search_phrase}}">
-                <button class="btn btn-outline-succes my-2 my-sm-0" type="submit">Search</button>
+                <button type="submit" class="btn btn-primary mb-2 mt-2">
+                        <span class="glyphicon glyphicon-search"></span> Search
+                      </button>
+                
           </form>
-          <form class="form-inline my-2 my-lg-1">
+          <form class="form-inline my-2 my-lg-1 mb-2">
                 <input 
-                class="form-control mr-sm-2"    
+                class="form-control mr-sm-2 mb-2"    
                 type="search"
                 placeholder="Search Manufacturer"
                 aria-label="Search Manufacturer"
                 name="search_manufacturer"
                 value="{{search_manufacturer}}">
-                <button class="btn btn-outline-succes my-2 my-sm-0" type="submit">Search</button>
-          </form>
+                <button type="submit" class="btn btn-primary mb-2">
+                        <span class="glyphicon glyphicon-search"></span> Search
+                      </button>
+                
+            </form>
+            <hr class="mt-0 mb-2">
+
     {% if request.user|group_tag:"Provider"  %}
-        <button><a href="{% url 'new_product' %}">New</a></button>
+        <a href="{% url 'new_product' %}" class="btn btn-success mb-2"><span class="glyphicon glyphicon-add"></span>Dodaj Produkt</a>
+        <hr class="mt-0 mb-2">
+
     {% endif %}
     
     {% for product in products %}
     <article>
         <div class="product">
-            <h1><a href="{% url 'product_detail' pk=product.pk %}">{{ product.name }}</a></h1>
-            <h4>{{ product.manufacturer }}</h4>
-            <h6><div class="date">
-                    {{ product.created_date }}
-                </div></h6>
-            {% if product.photo %}
-                <img src="{{ product.photo.url}}" height="50">
-            {% endif %}
-                <b><p>{{ product.price|linebreaksbr }} zł</p></b>
+            <ul class="row">
+
+                <div>
+
+                    {% if product.photo %}
+                        <img src="{{ product.photo.url}}" height="75" >
+                    {% endif %}
+                    
+                </div>
+                <div>
+
+                    <h1><a href="{% url 'product_detail' pk=product.pk %}">{{ product.name }}</a></h1>
+                    <h4>{{ product.manufacturer }}</h4>
+                    <h6><div class="date">
+                            {{ product.created_date }}
+                        </div></h6>
+                        <b><p>{{ product.price|linebreaksbr }} zł</p></b>
+
+                </div>
+
+            </ul>
         </div>
     </article>
+    <hr class="mt-0 mb-2">
     {% endfor %}
     
-    <div class="pagination">
+    <ul class="pagination">
             <span class="step-links">
                 {% if products.has_previous %}
-                    <a href="?page=1">&laquo; first</a>
-                    <a href="?page={{ products.previous_page_number }}">previous</a>
+                <li class="page-item"><a class="page-link" href="?page=1">&laquo; first</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ products.previous_page_number }}">previous</a></li>
                 {% endif %}
-        
-                <span class="current">
-                    Page {{ products.number }} of {{ products.paginator.num_pages }}.
-                </span>
         
                 {% if products.has_next %}
-                    <a href="?page={{ products.next_page_number }}">next</a>
-                    <a href="?page={{ products.paginator.num_pages }}">last &raquo;</a>
+                <li class="page-item"><a class="page-link" href="?page={{ products.next_page_number }}">next</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ products.paginator.num_pages }}">last &raquo;</a></li>
                 {% endif %}
             </span>
-        </div>
+            <span class="current">
+                Page {{ products.number }} of {{ products.paginator.num_pages }}.
+            </span>
+    
+    </ul>
 {% endblock %}

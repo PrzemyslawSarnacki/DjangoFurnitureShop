@@ -1,10 +1,12 @@
 {% extends 'index/base.html' %}
+{% load crispy_forms_tags %}
+
 
 {% block content %}
     <h1>Edytuj</h1>
     <form method="POST" class="product-form">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" name="save">Save</button>
+        {{ form|crispy }}
+        <button type="submit" name="save" class="btn btn-primary btn-md my-0 p">Save</button>
     </form>
 {% endblock %}

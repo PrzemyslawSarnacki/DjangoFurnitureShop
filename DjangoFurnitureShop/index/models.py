@@ -95,12 +95,20 @@ class User(models.Model):
 class UserAddress(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                             on_delete=models.CASCADE)
-    company_name = models.CharField(max_length=20)
+    company_name = models.CharField(max_length=20, blank=True, null=True)
     name = models.CharField(max_length=30)
     surname = models.CharField(max_length=30)
     street = models.CharField(max_length=30)
     house_number = models.CharField(max_length=30)
-    house_unit_number = models.CharField(max_length=30)
+    house_unit_number = models.CharField(max_length=30, blank=True, null=True)
     post_code = models.CharField(max_length=30)
     city = models.CharField(max_length=30)
 
+class Mails(models.Model):
+    email = models.EmailField() 
+    subject = models.CharField(max_length=1000)
+    message = models.CharField(max_length=20000)
+    document = models.FileField(upload_to='documents/')
+    
+    def __str__(self):
+        return self.email 

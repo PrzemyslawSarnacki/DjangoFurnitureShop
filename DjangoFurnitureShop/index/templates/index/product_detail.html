@@ -6,9 +6,9 @@
 	<ul class="user">
     </ul> 
     {% if request.user|group_tag:"Provider"  %}
-        <button><a href="{% url 'new_product' %}">New</a></button>
-        <button><a href="{% url 'edit_product' pk=product.pk %}">Edit</a></button>
-        <button><a href="{% url 'delete_product' pk=product.pk %}">Delete</a></button>
+        <a href="{% url 'new_product' %}" class="btn btn-success btn-md my-0 p">New</a>
+        <a href="{% url 'edit_product' pk=product.pk %}" class="btn btn-primary btn-md my-0 p">Edit</a>
+        <a href="{% url 'delete_product' pk=product.pk %}" class="btn btn-danger btn-md my-0 p">Delete</a>
     {% endif %}
 
     {% if user == product.manufacturer %}
