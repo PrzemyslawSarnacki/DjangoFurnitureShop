@@ -1,0 +1,24 @@
+<div class="col-md-12 mb-4">
+        <h4 class="d-flex justify-content-between align-products-center mb-3">
+        <span class="text-muted">Zawartość koszyka</span>
+        <span class="badge badge-secondary badge-pill">{{ order.products.count }}</span>
+        </h4>
+        <ul class="list-group mb-3 z-depth-1">
+        {% for order_product in order.products.all %}
+        <li class="list-group-product d-flex justify-content-between lh-condensed">
+            <div>
+            <h6 class="my-0">{{ order_product.quantity }} x {{ order_product.product.name}}</h6>
+            <small class="text-muted">{{ order_product.product.description}}</small>
+            </div>
+            <span class="text-muted">${{ order_product.get_total_price }}</span>
+        </li>
+        {% endfor %}
+        <li class="list-group-product d-flex justify-content-between">
+            <span>Suma :</span>
+            <strong>${{ order.get_total }} zł</strong>
+        </li>
+        </ul>
+    
+    
+    </div>
+    

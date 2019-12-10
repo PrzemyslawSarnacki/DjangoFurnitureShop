@@ -1,5 +1,6 @@
 from django.conf import settings 
 from django.db import models
+from django.shortcuts import reverse
 from django.utils import timezone
 
 class Product(models.Model):
@@ -11,12 +12,22 @@ class Product(models.Model):
     price = models.FloatField()
     photo = models.ImageField(upload_to = 'media/', max_length=255, null=True, blank=True)
 
+    def __str__(self):
+        return self.name
+
     def create(self):
         self.created_date = timezone.now()
         self.save()
 
-    def __str__(self):
-        return self.name
+    def get_add_to_cart_url(self):
+        return reverse('add_to_cart', kwargs={
+            'pk': self.pk
+        })
+
+    def get_remove_from_cart_url(self):
+        return reverse('remove_from_cart', kwargs={
+            'pk': self.pk
+        })    
 
 
 class Comment(models.Model):
@@ -60,8 +71,17 @@ class Order(models.Model):
     shipping_address = models.ForeignKey(
         'UserAddress', related_name='shipping_address', on_delete=models.SET_NULL, blank=True, null=True)
     sale_date = models.DateField(auto_now_add=True)
-    payment_deadline = models.DateField()
+    payment_deadline = models.DateField(auto_now_add=True)
     # total_price = models.FloatField()
+
+    def __str__(self):
+        return self.user.username
+
+    def get_total(self):
+        total = 0
+        for order_product in self.products.all():
+            total += order_product.get_total_price()
+        return total
 
 
 class User(models.Model):

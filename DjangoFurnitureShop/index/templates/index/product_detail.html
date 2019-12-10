@@ -25,6 +25,12 @@
                     {% endif %}
                     <p>{{ product.description|linebreaksbr }}</p>
             <b><p>{{ product.price|linebreaksbr }} zł</p></b>
-            <button>Dodaj do koszyka</button>
+            <a href="{% url 'add_to_cart' pk=product.pk %}" class="btn btn-primary btn-md my-0 p">
+                    Dodaj do koszyka
+                    <i class="fas fa-shopping-cart ml-1"></i>
+                  </a>
+                  <a href="{% url 'remove_from_cart' pk=product.pk %}" class="btn btn-danger btn-md my-0 p">
+                    Usuń z koszyka
+                  </a>
         </div>
 {% endblock %}

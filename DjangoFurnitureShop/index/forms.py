@@ -18,3 +18,11 @@ class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
         fields = ('author', 'text')
+
+class CheckoutForm(forms.Form):
+    shipping_address = forms.CharField(required=False)
+    shipping_post_code = forms.CharField(required=False)
+
+    set_default_shipping = forms.BooleanField(required=False)
+    use_default_shipping = forms.BooleanField(required=False)
+    

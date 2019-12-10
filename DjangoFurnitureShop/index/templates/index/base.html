@@ -18,11 +18,11 @@
             <a href="/">Strona Główna</a>
             {% if user.is_authenticated %}
             <a href="/logout/">logout</a>
+            <a href="/order_summary">Koszyk</a>
             {% else %}
             <a href="/register/">Zarejestruj</a>
             <a href="/login/">Login</a>
             {% endif %}
-            <a href="/">Strona Główna</a>
         </div>
     <div class="content container">
         <div class="row">
@@ -31,6 +31,20 @@
             {% endblock %}
             </div>
         </div>
+    </div>
+</body>
+<body>
+    <div class="mt-5 pt-4">
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            {% endfor %}
+        {% endif %}
     </div>
 </body>
 </html>
