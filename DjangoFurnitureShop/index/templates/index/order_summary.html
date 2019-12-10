@@ -5,15 +5,15 @@
     <div class="container">
 
     <div class="table-responsive text-nowrap">
-    <h2>Order Summary</h2>
+    <h2>Podsumowanie zamówienia</h2>
     <table class="table">
         <thead>
         <tr>
-            <th scope="col">#</th>
-            <th scope="col">product title</th>
-            <th scope="col">Price</th>
-            <th scope="col">Quantity</th>
-            <th scope="col">Total</th>
+            <th scope="col">L.p.</th>
+            <th scope="col">Nazwa Produktu</th>
+            <th scope="col">Cena</th>
+            <th scope="col">Ilość</th>
+            <th scope="col">Suma</th>
         </tr>
         </thead>
         <tbody>
@@ -36,23 +36,23 @@
         </tr>
         {% empty %}
         <tr>
-            <td colspan='5'>Your cart is empty</td>
+            <td colspan='5'>Koszyk jest pusty</td>
         </tr>
         <tr>
             <td colspan="5">
-            <a class='btn btn-primary float-right' href='/'>Continue shopping</a>
+            <a class='btn btn-primary float-right' href='/'>Kontynnuuj zakupy</a>
             </td>
         </tr>
         {% endfor %}
         {% if order.get_total %}
         <tr>
-            <td colspan="4"><b>Order Total</b></td>
+            <td colspan="4"><b>Cena całkowita</b></td>
             <td><b>{{ order.get_total }} zł</b></td>
         </tr>
         <tr>
             <td colspan="5">
-            <a class='btn btn-warning float-right ml-2' href='/checkout/'>Proceed to checkout</a>
-            <a class='btn btn-primary float-right' href='/'>Continue shopping</a>
+            <a class='btn btn-warning float-right ml-2' href='/checkout/'>Kup Teraz</a>
+            <a class='btn btn-primary float-right' href='/'>Kontynnuuj zakupy</a>
             </td>
         </tr>
         {% endif %}

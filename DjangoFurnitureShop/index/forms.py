@@ -1,5 +1,5 @@
 from django import forms
-from .models import Product, Comment
+from .models import Product, Comment, UserAddress
 import django_filters
 
 
@@ -20,9 +20,15 @@ class CommentForm(forms.ModelForm):
         fields = ('author', 'text')
 
 class CheckoutForm(forms.Form):
-    shipping_address = forms.CharField(required=False)
-    shipping_post_code = forms.CharField(required=False)
-
-    set_default_shipping = forms.BooleanField(required=False)
-    use_default_shipping = forms.BooleanField(required=False)
+    company_name = forms.CharField(max_length=20)
+    name = forms.CharField(max_length=30)
+    surname = forms.CharField(max_length=30)
+    street = forms.CharField(max_length=30)
+    house_number = forms.CharField(max_length=30)
+    house_unit_number = forms.CharField(max_length=30)
+    post_code = forms.CharField(max_length=30)
+    city = forms.CharField(max_length=30)
     
+    class Meta:
+        model = UserAddress
+        fields = ('author', 'text')

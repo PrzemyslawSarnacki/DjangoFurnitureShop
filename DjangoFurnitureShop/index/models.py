@@ -93,7 +93,8 @@ class User(models.Model):
 
 
 class UserAddress(models.Model):
-    username = models.CharField(max_length=10)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                            on_delete=models.CASCADE)
     company_name = models.CharField(max_length=20)
     name = models.CharField(max_length=30)
     surname = models.CharField(max_length=30)

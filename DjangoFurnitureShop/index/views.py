@@ -109,7 +109,6 @@ def checkout(request):
     if request.method == "GET":
         try:
             order = Order.objects.get(user=request.user, ordered=False)
-            print(order)
             form = CheckoutForm()
             context = {
                 'form': form,
@@ -118,7 +117,6 @@ def checkout(request):
 
             shipping_address_qs = UserAddress.objects.filter(
                 user=request.user,
-                default=True
             )
             if shipping_address_qs.exists():
                 context.update(
@@ -140,7 +138,6 @@ def checkout(request):
                     address_qs = UserAddress.objects.filter(
                         user=request.user,
                         address_type='S',
-                        default=True
                     )
                     if address_qs.exists():
                         shipping_address = address_qs[0]
