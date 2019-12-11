@@ -38,7 +38,7 @@
 
     {% endif %}
     
-    {% for product in products %}
+    {% for product in search_products %}
     <article>
         <div class="product">
             <ul class="row">
@@ -69,17 +69,17 @@
     
     <nav aria-label="Page navigation" class="pagination">
             <ul class="pagination">
-                {% if products.has_previous %}
-                <li class="page-item"><a class="page-link" href="?page=1">&laquo; Pierwsza</a></li>
-                <li class="page-item"><a class="page-link" href="?page={{ products.previous_page_number }}">Poprzednia</a></li>
+                {% if search_products.has_previous %}
+                <li class="page-item"><a class="page-link" href="?searchpage=1">&laquo; Pierwsza</a></li>
+                <li class="page-item"><a class="page-link" href="?searchpage={{ search_products.previous_page_number }}">Poprzednia</a></li>
                 {% endif %}
-                {% for i in products.paginator.page_range %}
-                <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                {% for i in search_products.paginator.page_range %}
+                <li class="page-item"><a class="page-link" href="?searchpage={{ i }}">{{ i }}</a></li>
                 {% endfor %}
 
-                {% if products.has_next %}
-                <li class="page-item"><a class="page-link" href="?page={{ products.next_page_number }}">Następna</a></li>
-                <li class="page-item"><a class="page-link" href="?page={{ products.paginator.num_pages }}">Ostatnia &raquo;</a></li>
+                {% if search_products.has_next %}
+                <li class="page-item"><a class="page-link" href="?searchpage={{ search_products.next_page_number }}">Następna</a></li>
+                <li class="page-item"><a class="page-link" href="?searchpage={{ search_products.paginator.num_pages }}">Ostatnia &raquo;</a></li>
                 {% endif %}
             </ul>
             
@@ -87,6 +87,6 @@
     
 </nav>
         <span class="current">
-            Strona {{ products.number }} z {{ products.paginator.num_pages }}.
+            Strona {{ search_products.number }} z {{ search_products.paginator.num_pages }}.
         </span>
 {% endblock %}

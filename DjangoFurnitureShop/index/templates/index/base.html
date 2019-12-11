@@ -28,11 +28,6 @@
                         <li class="nav-item">
                         <a class="nav-link" href="/logout/">Wyloguj</a>
                         </li>
-                        {% if request.user|group_tag:"Provider"  %}
-                            <h5>Zalogowano jako sprzedawca</h5>
-                        {% else %}
-                            <h5>Zalogowano jako klient</h5>
-                        {% endif %}
                       {% else %}
 
                       <li class="nav-item">
@@ -45,27 +40,29 @@
 
                       {% endif %}
                     </ul>
-                    <div class="mt-5 pt-4">
-                            {% if messages %}
-                                {% for message in messages %}
-                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                                    {{ message }}
-                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                    </button>
                     
-                                </div>
-                                {% endfor %}
-                            {% endif %}
-                        </div>
                 
                   </nav>
 
 
+                  <div class="mt-0 pt-0">
+                          {% if messages %}
+                              {% for message in messages %}
+                              <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                  {{ message }}
+                                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                                  </button>
+                  
+                              </div>
+                              {% endfor %}
+                          {% endif %}
+                      </div>
     <div class="content container">
         <div class="row">
             <div class="column-200">
             {% block content %}
+            
             {% endblock %}
             </div>
         </div>

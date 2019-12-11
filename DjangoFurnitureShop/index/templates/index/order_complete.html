@@ -1,0 +1,8 @@
+{% extends 'index/base.html' %}
+
+{% block content %}
+    <form method="POST" class="product-form">
+        {% csrf_token %}
+        <h2>Zamówienie zostało złożone</h2>
+    </form>
+{% endblock %}

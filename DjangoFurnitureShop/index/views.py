@@ -10,26 +10,31 @@ from .models import Product, Comment, Order, OrderProduct, UserAddress
 from .forms import ProductForm, CommentForm, CheckoutForm
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
+from django.core.mail import send_mail
+from . import generate_invoice
 
 
 def product_list(request):
     search_phrase = ''
     search_manufacturer = ''
     products = Product.objects.all()
-    paginator = Paginator(products, 3)
-    page = request.GET.get('page')
-    products = paginator.get_page(page)
     users = User.objects.all()
     if 'search' in request.GET:
+        products = Product.objects.all()
         search_phrase = request.GET['search']
         products = products.filter(manufacturer_id__username=search_phrase)
         if products.first() == None:
             products = Product.objects.all()
             products = products.filter(name__icontains=search_phrase)
     if 'search_manufacturer' in request.GET:
+        products = Product.objects.all()
         search_manufacturer = request.GET['search_manufacturer']
         products = products.filter(
             manufacturer_id__username=search_manufacturer)
+    else:
+        paginator = Paginator(products, 3)
+        page = request.GET.get('page')
+        products = paginator.get_page(page)
     context = {'products': products, 'users': users,
                'search_phrase': search_phrase, 'search_manufacturer': search_manufacturer}
     return render(request, 'index/product_list.html', context)
@@ -135,77 +140,85 @@ def checkout(request):
                     'post_code': shipping_address_qs[0].post_code,
                     'city': shipping_address_qs[0].city
                 })
-                context = {
-                    'form': form,
-                    'order': order,
-                }
-                context.update(
-                    {'default_shipping_address': shipping_address_qs[0]})
             else:
                 form = CheckoutForm()
-                context = {
-                    'form': form,
-                    'order': order,
-                }
+            context = {
+                'form': form,
+                'order': order,
+            }
             return render(request, "index/checkout.html", context)
         except ObjectDoesNotExist:
             messages.info(request, "Nie masz żadnego zamówienia")
             return redirect('/')
     if request.method == "POST":
-        form = CheckoutForm(request.POST or None)
+        print('form')
+        form = CheckoutForm(data=request.POST)
         try:
             order = Order.objects.get(user=request.user, ordered=False)
+            print(form.errors)
             if form.is_valid():
-                use_default_shipping = form.cleaned_data.get(
-                    'use_default_shipping')
-                if use_default_shipping:
-                    print("Using the defualt shipping address")
-                    address_qs = UserAddress.objects.filter(
-                        user=request.user,
-                    )
-                    if address_qs.exists():
-                        shipping_address = address_qs[0]
-                        order.shipping_address = shipping_address
-                        order.save()
-                    else:
-                        messages.info(
-                            request, "No default shipping address available")
-                        return redirect('core:checkout')
-                else:
-                    print("User is entering a new shipping address")
-                    shipping_address1 = form.cleaned_data.get(
-                        'shipping_address')
-                    shipping_address2 = form.cleaned_data.get(
-                        'shipping_address2')
-                    shipping_country = form.cleaned_data.get(
-                        'shipping_country')
-                    shipping_zip = form.cleaned_data.get('shipping_zip')
+                print('ordervalid')
+                company_name = form.cleaned_data.get('company_name')
 
-                    if is_valid_form([shipping_address1, shipping_country, shipping_zip]):
-                        shipping_address = UserAddress(
-                            user=request.user,
-                            street_address=shipping_address1,
-                            apartment_address=shipping_address2,
-                            country=shipping_country,
-                            zip=shipping_zip,
-                        )
-                        shipping_address.save()
+                name = form.cleaned_data.get('name')
+                surname = form.cleaned_data.get('surname')
+                street = form.cleaned_data.get('street')
+                house_number = form.cleaned_data.get('house_number')
+                house_unit_number = form.cleaned_data.get('house_unit_number')
+                post_code = form.cleaned_data.get('post_code')
+                city = form.cleaned_data.get('city')
+                payment_deadline = form.cleaned_data.get('payment_deadline') 
+                print(payment_deadline)
 
-                        order.shipping_address = shipping_address
-                        order.save()
+                shipping_address = UserAddress(
+                    user=request.user,
+                    company_name=company_name,
+                    name=name,
+                    surname=surname,
+                    street=street,
+                    house_number=house_number,
+                    house_unit_number=house_unit_number,
+                    post_code=post_code,
+                    city=city
+                )
+                shipping_address.save()
+                order_products = OrderProduct.objects.filter(
+                user=request.user, ordered = False
+                )
+                items_list =[]
+                for order_product in order_products:
+                    order_product.ordered = True
+                    order_product.save()
+                    items_list.append(order_product.quantity)
+                    items_list.append(order_product.product.price)
+                    items_list.append(order_product.product.name)
+                generate_invoice.create_invoice('','','','','','',items_list)
+                order.shipping_address = shipping_address
+                order.ordered = True
 
-                        set_default_shipping = form.cleaned_data.get(
-                            'set_default_shipping')
-                        if set_default_shipping:
-                            shipping_address.default = True
-                            shipping_address.save()
 
-                    else:
-                        messages.info(
-                            request, "Please fill in the required shipping address fields")
+
+                order.payment_deadline = payment_deadline
+
+                send_mail('Potwierdzenie zamówienia', 
+                    f''' To jest wiadomość wygenerowana automatycznie.
+                    NIE ODPOWIADAJ NA OTRZYMANĄ WIADOMOŚĆ.
+
+                    Dziękujemy za złożenie zamówienia.
+                    Wartość zamówienia wynosi {order.get_total()} zł.
+                    Należność należy wpłacić do dnia : {payment_deadline}
+                    W przeciwnym razie zamówienie zostanie anulowane.
+                    ''', 'dawid.laskowski97@gmail.com', ['przemos100@gmail.com'])
+                order.save()
+                return render(request, "index/order_complete.html", {})
+            else:
+                print(form.errors)
+                messages.info(
+                    request, "Wypełnij wymagane pola")
+                return redirect("checkout")
 
         except ObjectDoesNotExist:
-            messages.warning(request, "You do not have an active order")
+            messages.warning(request, "Nie posiadasz żadnego aktywnego zamówienia")
             return redirect("order_summary")
 
 

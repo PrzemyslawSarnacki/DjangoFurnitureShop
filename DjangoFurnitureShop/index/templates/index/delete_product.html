@@ -1,7 +1,6 @@
 {% extends 'index/base.html' %}
 
 {% block content %}
-    <h1>Edytuj</h1>
     <form method="POST" class="product-form">
         {% csrf_token %}
         <h2>Czy napewno chcesz usunąć produkt o nazwie : "{{product.name}}"?</h2>
