@@ -1,14 +1,21 @@
 {% extends 'index/base.html' %}
 {% load crispy_forms_tags %}
+{% load group_tag %}
+
 {% block title %}
 Create New Product
 {% endblock %}
 
 {% block content %}
+    {% if request.user|group_tag:"Provider"  %}
     <h1>New post</h1>
     <form method="POST" class="product-form">
         {% csrf_token %}
         {{ product|crispy }}
         <button type="submit" name="save" class="btn btn-primary btn-md my-0 p">Save</button>
     </form>
+    {% else %}
+    <h1>Nie masz tutaj dostępu!</h1>
+    {% endif %}
+    
 {% endblock %}

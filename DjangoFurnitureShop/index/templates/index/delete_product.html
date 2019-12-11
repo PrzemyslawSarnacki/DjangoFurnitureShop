@@ -1,9 +1,16 @@
 {% extends 'index/base.html' %}
+{% load group_tag %}
+
 
 {% block content %}
+    {% if request.user|group_tag:"Provider"  %}
+    
     <form method="POST" class="product-form">
         {% csrf_token %}
         <h2>Czy napewno chcesz usunąć produkt o nazwie : "{{product.name}}"?</h2>
         <p><input type="sumbit" value="Yes"><a href="../">Cancel</a></p>
     </form>
+    {% else %}
+    <h1>Nie masz tutaj dostępu!</h1>
+    {% endif %}
 {% endblock %}

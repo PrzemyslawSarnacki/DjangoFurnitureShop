@@ -22,14 +22,14 @@ class CommentForm(forms.ModelForm):
 
 class CheckoutForm(forms.Form):
     company_name = forms.CharField(max_length=20, required=False)
-    name = forms.CharField(max_length=30, required=False)
-    surname = forms.CharField(max_length=30, required=False)
-    street = forms.CharField(max_length=30, required=False)
-    house_number = forms.CharField(max_length=30, required=False)
+    name = forms.CharField(max_length=30)
+    surname = forms.CharField(max_length=30)
+    street = forms.CharField(max_length=30)
+    house_number = forms.CharField(max_length=30)
     house_unit_number = forms.CharField(max_length=30, required=False)
-    post_code = forms.CharField(max_length=30, required=False)
-    city = forms.CharField(max_length=30, required=False)
-    payment_deadline = forms.DateField(initial=datetime.date.today, required=False)
+    post_code = forms.CharField(max_length=30)
+    city = forms.CharField(max_length=30)
+    payment_deadline = forms.DateField(initial=datetime.date.today)
     
     class Meta:
         model = UserAddress

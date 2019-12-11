@@ -1,13 +1,14 @@
 {% extends "index/base.html" %}
 {% load crispy_forms_tags %}
+{% load group_tag %}
+
 
 {% block content %}
 
   <main >
     <div class="container wow fadeIn">
       <h2 class="my-5 h2 text-center">Koszyk</h2>
-      <div class="row">
-        <div class="col-md-8 mb-4">
+        <div class="col-md-10 mb-4 ">
           <div class="card">
             <form method="POST" class="card-body">
               {% csrf_token %}
@@ -18,7 +19,7 @@
                   {{form|crispy}}
               </div>
               <hr>
-              <div class="col-md-4 mb-4">
+              <div class="col-md-8 mb-4">
                     {% include "index/order_snippet.html" %}
                 </div>
                 <hr class="mb-4">
@@ -26,7 +27,6 @@
             
                 </div>
 
-              </div>
 
               
             </form>
@@ -35,10 +35,6 @@
 
     </div>
     
-    
-      </div>
-
-    </div>
   </main>
 
 {% endblock content %}

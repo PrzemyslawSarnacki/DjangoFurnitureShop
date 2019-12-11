@@ -10,7 +10,7 @@ from .models import Product, Comment, Order, OrderProduct, UserAddress
 from .forms import ProductForm, CommentForm, CheckoutForm
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMessage
 from . import generate_invoice
 
 
@@ -151,13 +151,10 @@ def checkout(request):
             messages.info(request, "Nie masz żadnego zamówienia")
             return redirect('/')
     if request.method == "POST":
-        print('form')
         form = CheckoutForm(data=request.POST)
         try:
             order = Order.objects.get(user=request.user, ordered=False)
-            print(form.errors)
             if form.is_valid():
-                print('ordervalid')
                 company_name = form.cleaned_data.get('company_name')
 
                 name = form.cleaned_data.get('name')
@@ -167,8 +164,7 @@ def checkout(request):
                 house_unit_number = form.cleaned_data.get('house_unit_number')
                 post_code = form.cleaned_data.get('post_code')
                 city = form.cleaned_data.get('city')
-                payment_deadline = form.cleaned_data.get('payment_deadline') 
-                print(payment_deadline)
+                payment_deadline = form.cleaned_data.get('payment_deadline')
 
                 shipping_address = UserAddress(
                     user=request.user,
@@ -183,25 +179,25 @@ def checkout(request):
                 )
                 shipping_address.save()
                 order_products = OrderProduct.objects.filter(
-                user=request.user, ordered = False
+                    user=request.user, ordered=False
                 )
-                items_list =[]
+                items_list = []
                 for order_product in order_products:
                     order_product.ordered = True
                     order_product.save()
                     items_list.append(order_product.quantity)
                     items_list.append(order_product.product.price)
                     items_list.append(order_product.product.name)
-                generate_invoice.create_invoice('','','','','','',items_list)
+                generate_invoice.create_invoice('Meble Warszawa', 'ul. Warszawska 21', '00-000 Warszawa',
+                                                f'{shipping_address.name} {shipping_address.surname}',
+                                                f'{shipping_address.street} {shipping_address.house_number}',
+                                                shipping_address.post_code, items_list)
                 order.shipping_address = shipping_address
                 order.ordered = True
-
-
-
                 order.payment_deadline = payment_deadline
 
-                send_mail('Potwierdzenie zamówienia', 
-                    f''' To jest wiadomość wygenerowana automatycznie.
+                email = EmailMessage('Potwierdzenie zamówienia',
+                                     f''' To jest wiadomość wygenerowana automatycznie.
                     NIE ODPOWIADAJ NA OTRZYMANĄ WIADOMOŚĆ.
 
                     Dziękujemy za złożenie zamówienia.
@@ -209,6 +205,9 @@ def checkout(request):
                     Należność należy wpłacić do dnia : {payment_deadline}
                     W przeciwnym razie zamówienie zostanie anulowane.
                     ''', 'dawid.laskowski97@gmail.com', ['przemos100@gmail.com'])
+                email.attach_file('Proforma.pdf')
+                email.send()
+
                 order.save()
                 return render(request, "index/order_complete.html", {})
             else:
@@ -218,7 +217,8 @@ def checkout(request):
                 return redirect("checkout")
 
         except ObjectDoesNotExist:
-            messages.warning(request, "Nie posiadasz żadnego aktywnego zamówienia")
+            messages.warning(
+                request, "Nie posiadasz żadnego aktywnego zamówienia")
             return redirect("order_summary")
 
 

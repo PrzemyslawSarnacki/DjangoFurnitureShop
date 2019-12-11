@@ -1,5 +1,9 @@
+{% load group_tag %}
+
 <div class="col-md-12 mb-4">
-        <h4 class="d-flex justify-content-between align-products-center mb-3">
+    {% if request.user|group_tag:"Customer"  %}
+        
+    <h4 class="d-flex justify-content-between align-products-center mb-3">
         <span class="text-muted">Zawartość koszyka</span>
         <span class="badge badge-secondary badge-pill">{{ order.products.count }}</span>
         </h4>
@@ -20,8 +24,9 @@
             <span>Suma :</span>
             <strong>{{ order.get_total }} zł</strong>
         </li>
-        </ul>
-    
-    
+    </ul>
+    {% else %}
+    <h1>Nie masz tutaj dostępu!</h1>
+    {% endif %}
     </div>
     

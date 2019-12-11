@@ -3,8 +3,10 @@
 {% load group_tag %}
 
 {% block content %}
+{% load group_tag %}
 
-          <form class="form-inline my-2 my-lg-1 mt-2">
+
+          <form class="form-inline ml-4 my-2 my-lg-1 mt-2">
                 <input 
                 class="form-control mr-sm-2 mb-2 mt-2"    
                 type="search"
@@ -12,12 +14,12 @@
                 aria-label="Search"
                 name="search"
                 value="{{search_phrase}}">
-                <button type="submit" class="btn btn-primary mb-2 mt-2">
+                <button type="submit" class="btn btn-primary  mb-2 mt-2">
                         <span class="glyphicon glyphicon-search"></span> Search
                       </button>
                 
           </form>
-          <form class="form-inline my-2 my-lg-1 mb-2">
+          <form class="form-inline ml-4 my-2 my-lg-1 mb-2">
                 <input 
                 class="form-control mr-sm-2 mb-2"    
                 type="search"
@@ -33,7 +35,7 @@
             <hr class="mt-0 mb-2">
 
     {% if request.user|group_tag:"Provider"  %}
-        <a href="{% url 'new_product' %}" class="btn btn-success mb-2"><span class="glyphicon glyphicon-add"></span>Dodaj Produkt</a>
+        <a href="{% url 'new_product' %}" class="btn btn-success mb-2 ml-4"><span class="glyphicon glyphicon-add"></span>Dodaj Produkt</a>
         <hr class="mt-0 mb-2">
 
     {% endif %}
