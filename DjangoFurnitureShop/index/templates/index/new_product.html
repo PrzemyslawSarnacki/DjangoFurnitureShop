@@ -8,11 +8,11 @@ Create New Product
 
 {% block content %}
     {% if request.user|group_tag:"Provider"  %}
-    <h1>New post</h1>
+    <h1>Nowy produkt</h1>
     <form method="POST" class="product-form">
         {% csrf_token %}
         {{ product|crispy }}
-        <button type="submit" name="save" class="btn btn-primary btn-md my-0 p">Save</button>
+        <button type="submit" name="save" class="btn btn-primary btn-md my-0 p">Zapisz</button>
     </form>
     {% else %}
     <h1>Nie masz tutaj dostępu!</h1>

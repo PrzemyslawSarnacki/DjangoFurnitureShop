@@ -52,13 +52,15 @@ def product_detail(request, pk):
 
 def new_product(request):
     if request.method == 'POST':
-        product = ProductForm(request.POST, request.FILES)
-        if product.is_valid():
+        form = ProductForm(request.POST, request.FILES)
+        if form.is_valid():
+            product = form.save(commit=False)
+            product.manufacturer = request.user
             product.save()
             return redirect('/')
     else:
-        product = ProductForm()
-    return render(request, 'index/new_product.html', {'product': product})
+        form = ProductForm()
+    return render(request, 'index/new_product.html', {'product': form})
 
 
 def edit_product(request, pk):
@@ -81,7 +83,6 @@ def delete_product(request, pk):
     if request.method == 'POST':
         product.delete()
     return render(request, 'index/delete_product.html', {'product': product})
-
 
 def add_to_cart(request, pk):
     product = get_object_or_404(Product, pk=pk)

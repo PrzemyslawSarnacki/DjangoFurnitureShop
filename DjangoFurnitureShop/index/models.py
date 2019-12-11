@@ -5,7 +5,6 @@ from django.utils import timezone
 
 class Product(models.Model):
     name = models.CharField(max_length=200)
-    # manufacturer = models.CharField(max_length=200)
     manufacturer = models.ForeignKey('auth.User', on_delete=models.CASCADE)
     description = models.CharField(max_length=200)
     created_date = models.DateTimeField(default=timezone.now)
@@ -65,14 +64,12 @@ class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                             on_delete=models.CASCADE)
     products = models.ManyToManyField(OrderProduct)
-    # list_of_products = models.DictWrapper(products_dictionary)
     ordered_date = models.DateTimeField(auto_now_add=True)
     ordered = models.BooleanField(default=False)
     shipping_address = models.ForeignKey(
         'UserAddress', related_name='shipping_address', on_delete=models.SET_NULL, blank=True, null=True)
     sale_date = models.DateField(auto_now_add=True)
     payment_deadline = models.DateField(auto_now_add=True)
-    # total_price = models.FloatField()
 
     def __str__(self):
         return self.user.username
@@ -103,12 +100,3 @@ class UserAddress(models.Model):
     house_unit_number = models.CharField(max_length=30, blank=True, null=True)
     post_code = models.CharField(max_length=30)
     city = models.CharField(max_length=30)
-
-class Mails(models.Model):
-    email = models.EmailField() 
-    subject = models.CharField(max_length=1000)
-    message = models.CharField(max_length=20000)
-    document = models.FileField(upload_to='documents/')
-    
-    def __str__(self):
-        return self.email 

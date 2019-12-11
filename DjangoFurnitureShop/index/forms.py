@@ -1,18 +1,21 @@
 from django import forms
-from .models import Product, Comment, UserAddress
+from .models import Product, Comment, UserAddress, User
 import django_filters
 import datetime
 
 
 class ProductForm(forms.ModelForm):
     name = forms.CharField(max_length=200)
+    # manufacturer = forms.ModelChoiceField(queryset=User.objects.all(), widget=forms.HiddenInput(), initial=User.objects.all()[0])
+
     description = forms.CharField(max_length=200)
     price = forms.FloatField()
     photo = forms.ImageField(required=False, max_length=255)
 
     class Meta:
         model = Product
-        fields = ('name', 'manufacturer', 'description', 'price', 'photo')
+        fields = ('name', 'description', 'price', 'photo')
+        exclude = ('manufacturer','created_date',)
 
 class CommentForm(forms.ModelForm):
 
