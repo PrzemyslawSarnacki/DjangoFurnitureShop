@@ -10,12 +10,12 @@
                 <input 
                 class="form-control mr-sm-2 mb-2 mt-2"    
                 type="search"
-                placeholder="Search"
+                placeholder="Szukaj Produktu"
                 aria-label="Search"
                 name="search"
                 value="{{search_phrase}}">
                 <button type="submit" class="btn btn-primary  mb-2 mt-2">
-                        <span class="glyphicon glyphicon-search"></span> Search
+                        <span class="glyphicon glyphicon-search"></span> Szukaj
                       </button>
                 
           </form>
@@ -23,12 +23,12 @@
                 <input 
                 class="form-control mr-sm-2 mb-2"    
                 type="search"
-                placeholder="Search Manufacturer"
+                placeholder="Szukaj Sprzedawcy"
                 aria-label="Search Manufacturer"
                 name="search_manufacturer"
                 value="{{search_manufacturer}}">
                 <button type="submit" class="btn btn-primary mb-2">
-                        <span class="glyphicon glyphicon-search"></span> Search
+                        <span class="glyphicon glyphicon-search"></span> Szukaj
                       </button>
                 
             </form>
@@ -89,6 +89,9 @@
     
 </nav>
         <span class="current">
-            Strona {{ products.number }} z {{ products.paginator.num_pages }}.
+                {% if products.num_pages != None %}
+                {% else %}
+                Strona {{ products.number }} z {{ products.paginator.num_pages }}.
+                {% endif %}
         </span>
 {% endblock %}

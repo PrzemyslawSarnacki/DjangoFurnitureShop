@@ -3,38 +3,41 @@
 {% load group_tag %}
 
 {% block content %}
-	<ul class="user">
-    </ul> 
+<ul class="user">
+</ul>
 
+<div class="product">
+    <h1>{{ product.name }}</h1>
+    <h4>{{ product.manufacturer }}</h4>
+    <h6>
+        <div class="date">
+            {{ product.created_date }}
+        </div>
+    </h6>
+    {% if product.photo %}
+    <img src="{{ product.photo.url}}">
+    {% endif %}
+    <p>{{ product.description|linebreaksbr }}</p>
+    <b>
+        <p>{{ product.price|linebreaksbr }} zł</p>
+    </b>
+    {% if request.user|group_tag:"Provider"  %}
+    <a href="{% url 'new_product' %}" class="btn btn-success btn-md my-0 mb-2 p">Nowy</a>
     {% if user == product.manufacturer %}
-         		<h1>To twój produkt</h1>
-            {%endif %}
-        <div class="product">
-            <h1>{{ product.name }}</h1>
-            <h4>{{ product.manufacturer }}</h4>
-                <h6><div class="date">
-                        {{ product.created_date }}
-                    </div></h6>
-                    {% if product.photo %}
-                        <img src="{{ product.photo.url}}">
-                    {% endif %}
-                    <p>{{ product.description|linebreaksbr }}</p>
-            <b><p>{{ product.price|linebreaksbr }} zł</p></b>
-            {% if request.user|group_tag:"Provider"  %}
-        <a href="{% url 'new_product' %}" class="btn btn-success btn-md my-0 mb-2 p">Nowy</a>
-        <a href="{% url 'edit_product' pk=product.pk %}" class="btn btn-primary btn-md my-0 mb-2 p">Edytuj</a>
-        <a href="{% url 'delete_product' pk=product.pk %}" class="btn btn-danger btn-md my-0 mb-2 p">Usuń</a>
-        {% endif %}
-            
-            {% if request.user|group_tag:"Customer"  %}
-            
-            <a href="{% url 'add_to_cart' pk=product.pk %}" class="btn btn-primary btn-md my-0 mb-2 p">
-                    Dodaj do koszyka
-                    <i class="fas fa-shopping-cart ml-1"></i>
-                  </a>
-                  <a href="{% url 'remove_from_cart' pk=product.pk %}" class="btn btn-danger btn-md my-0 mb-2 p">
-                    Usuń z koszyka
-                </a>
-            {% endif %}
-            </div>
+    <a href="{% url 'edit_product' pk=product.pk %}" class="btn btn-primary btn-md my-0 mb-2 p">Edytuj</a>
+    <a href="{% url 'delete_product' pk=product.pk %}" class="btn btn-danger btn-md my-0 mb-2 p">Usuń</a>
+    {% endif %}
+    {% endif %}
+
+    {% if request.user|group_tag:"Customer"  %}
+
+    <a href="{% url 'add_to_cart' pk=product.pk %}" class="btn btn-primary btn-md my-0 mb-2 p">
+        Dodaj do koszyka
+        <i class="fas fa-shopping-cart ml-1"></i>
+    </a>
+    <a href="{% url 'remove_from_cart' pk=product.pk %}" class="btn btn-danger btn-md my-0 mb-2 p">
+        Usuń z koszyka
+    </a>
+    {% endif %}
+</div>
 {% endblock %}

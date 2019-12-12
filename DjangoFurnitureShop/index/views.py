@@ -10,7 +10,7 @@ from .models import Product, Comment, Order, OrderProduct, UserAddress
 from .forms import ProductForm, CommentForm, CheckoutForm
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
-from django.core.mail import send_mail, EmailMessage
+from django.core.mail import EmailMessage
 from . import generate_invoice
 
 
@@ -22,7 +22,7 @@ def product_list(request):
     if 'search' in request.GET:
         products = Product.objects.all()
         search_phrase = request.GET['search']
-        products = products.filter(manufacturer_id__username=search_phrase)
+        products = products.filter(manufacturer_id__username__icontains=search_phrase)
         if products.first() == None:
             products = Product.objects.all()
             products = products.filter(name__icontains=search_phrase)
@@ -30,7 +30,7 @@ def product_list(request):
         products = Product.objects.all()
         search_manufacturer = request.GET['search_manufacturer']
         products = products.filter(
-            manufacturer_id__username=search_manufacturer)
+            manufacturer_id__username__icontains=search_manufacturer)
     else:
         paginator = Paginator(products, 3)
         page = request.GET.get('page')
@@ -205,7 +205,7 @@ def checkout(request):
                     Wartość zamówienia wynosi {order.get_total()} zł.
                     Należność należy wpłacić do dnia : {payment_deadline}
                     W przeciwnym razie zamówienie zostanie anulowane.
-                    ''', 'dawid.laskowski97@gmail.com', ['przemos100@gmail.com'])
+                    ''', 'dawid.laskowski97@gmail.com', [str(request.user.email)])
                 email.attach_file('Proforma.pdf')
                 email.send()
 
