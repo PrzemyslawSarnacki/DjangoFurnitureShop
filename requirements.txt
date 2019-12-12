@@ -1,0 +1,13 @@
+asgiref==3.2.3
+Babel==2.7.0
+Django==2.2
+django-crispy-forms==1.8.1
+django-filter==2.2.0
+django-filters==0.2.1
+Pillow==6.2.1
+pytz==2019.3
+qrcode==6.1
+qrplatba==0.3.4
+reportlab==3.5.32
+six==1.13.0
+sqlparse==0.3.0

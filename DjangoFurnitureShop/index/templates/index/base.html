@@ -22,9 +22,12 @@
                     
                       {% if user.is_authenticated %}
                       
+                      
+                      {% if request.user|group_tag:"Customer"  %}
                       <li class="nav-item">
-                          <a class="nav-link" href="/order_summary">Koszyk</a>
-                        </li>
+                        <a class="nav-link" href="/order_summary">Koszyk</a>
+                      </li>
+                      {% endif %}
                         <li class="nav-item">
                         <a class="nav-link" href="/logout/">Wyloguj</a>
                         </li>
