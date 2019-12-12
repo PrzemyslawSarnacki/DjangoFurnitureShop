@@ -1,6 +1,5 @@
 from django import forms
 from .models import Product, Comment, UserAddress, User
-import django_filters
 import datetime
 
 
