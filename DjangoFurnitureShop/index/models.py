@@ -28,6 +28,8 @@ class Product(models.Model):
             'pk': self.pk
         })    
 
+    def get_absolute_url(self):
+        return reverse('product_detail', kwargs={'pk': self.pk})
 
 class Comment(models.Model):
 	post = models.ForeignKey('index.Product', on_delete=models.CASCADE, related_name='comments')

@@ -1,18 +1,16 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponse
-from django.db.models import Q
+from django.urls import reverse_lazy
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.utils import timezone
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.models import User
 from .models import Product, Comment, Order, OrderProduct, UserAddress
 from .forms import ProductForm, CommentForm, CheckoutForm
-from django.views.decorators.cache import never_cache
-from django.views.decorators.csrf import csrf_protect
 from django.core.mail import EmailMessage
 from . import generate_invoice
-from django.views.generic import ListView, DetailView, CreateView, UpdateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, View
 
 
 class ProductListView(ListView):
@@ -43,7 +41,7 @@ class ProductDetailView(DetailView):
     model = Product
 
 
-class ProductCreateView(CreateView):
+class ProductCreateView(LoginRequiredMixin, CreateView):
     model = Product
     template_name = 'index/new_product.html'
     fields = ['name', 'description', 'price', 'photo']
@@ -51,78 +49,40 @@ class ProductCreateView(CreateView):
     def form_valid(self, form):
         obj = form.save(commit=False)
         obj.manufacturer = self.request.user
-        obj.photo = form.cleaned_data['photo']
         obj.save()
         return redirect('/')
 
 
-def edit_product(request, pk):
-    product = get_object_or_404(Product, pk=pk)
-    if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES, instance=product)
-        if form.is_valid():
-            product = form.save(commit=False)
-            product.manufacturer = request.user
-            product.created_date = timezone.now()
-            product.save()
-            return redirect('product_detail', pk=product.pk)
-    else:
-        form = ProductForm(instance=product)
-    return render(request, 'index/edit_product.html', {'form': form})
+class ProductUpdateView(LoginRequiredMixin, UpdateView):
+    model = Product
+    template_name = 'index/edit_product.html'
+    fields = ['name', 'description', 'price', 'photo']
 
 
-def delete_product(request, pk):
-    product = get_object_or_404(Product, pk=pk)
-    if request.method == 'POST':
-        product.delete()
-    return render(request, 'index/delete_product.html', {'product': product})
+class ProductDeleteView(LoginRequiredMixin, DeleteView):
+    model = Product
+    success_url = reverse_lazy('product_list')
 
 
-def add_to_cart(request, pk):
-    product = get_object_or_404(Product, pk=pk)
-    try:
-        order_product = OrderProduct.objects.get(
-            product=product, user=request.user, ordered=False)
-    except ObjectDoesNotExist:
-        order_product = OrderProduct.objects.create(
-            product=product, user=request.user, ordered=False)
-    try:
-        order = Order.objects.get(user=request.user, ordered=False)
-        if order.products.filter(product__pk=product.pk).exists():
-            order_product.quantity += 1
-            order_product.save()
-            messages.info(request, "Zaaktualizowano ilość.")
-            return redirect("order_summary")
-        else:
-            order.products.add(order_product)
-            messages.info(request, "Dodano do koszyka.")
-            return redirect("order_summary")
-    except ObjectDoesNotExist:
-        ordered_date = timezone.now()
-        order = Order.objects.create(
-            user=request.user, ordered_date=ordered_date)
-        order.products.add(order_product)
-        messages.info(request, "Dodano do koszyka.")
-        return(redirect('order_summary'))
-
-
-def order_summary(request):
-    if request.method == "GET":
+class CartView(LoginRequiredMixin, View):
+    def get(self, *args, **kwargs):
         try:
-            order = Order.objects.get(user=request.user, ordered=False)
+            order = OrderProduct.objects.filter(user=self.request.user, ordered=False)
+            for o in order:
+                print(o.quantity)
 
-            return render(request, 'index/order_summary.html', {'order': order})
+            return render(self.request, 'index/cart.html', {'order': order})
         except ObjectDoesNotExist:
-            messages.warning(request, "Nie masz aktywnego zamówienia !")
+            messages.warning(self.request, "Nie masz aktywnego zamówienia !")
             return redirect("/")
 
 
-def checkout(request):
-    if request.method == "GET":
+class CheckoutView(View, LoginRequiredMixin):
+    def get(self, *args, **kwargs):
         try:
-            order = Order.objects.get(user=request.user, ordered=False)
+            order = Order.objects.get(user=self.request.user, ordered=False)
             shipping_address_qs = UserAddress.objects.filter(
-                user=request.user,
+                user=self.request.user,
             )
             if shipping_address_qs.exists():
                 form = CheckoutForm(initial={
@@ -141,14 +101,15 @@ def checkout(request):
                 'form': form,
                 'order': order,
             }
-            return render(request, "index/checkout.html", context)
+            return render(self.request, "index/checkout.html", context)
         except ObjectDoesNotExist:
-            messages.info(request, "Nie masz żadnego zamówienia")
+            messages.info(self.request, "Nie masz żadnego zamówienia")
             return redirect('/')
-    if request.method == "POST":
-        form = CheckoutForm(data=request.POST)
+
+    def post(self, *args, **kwargs):
+        form = CheckoutForm(data=self.request.POST)
         try:
-            order = Order.objects.get(user=request.user, ordered=False)
+            order = Order.objects.get(user=self.request.user, ordered=False)
             if form.is_valid():
                 company_name = form.cleaned_data.get('company_name')
 
@@ -162,7 +123,7 @@ def checkout(request):
                 payment_deadline = form.cleaned_data.get('payment_deadline')
 
                 shipping_address = UserAddress(
-                    user=request.user,
+                    user=self.request.user,
                     company_name=company_name,
                     name=name,
                     surname=surname,
@@ -174,7 +135,7 @@ def checkout(request):
                 )
                 shipping_address.save()
                 order_products = OrderProduct.objects.filter(
-                    user=request.user, ordered=False
+                    user=self.request.user, ordered=False
                 )
                 items_list = []
                 for order_product in order_products:
@@ -199,24 +160,52 @@ def checkout(request):
                     Wartość zamówienia wynosi {order.get_total()} zł.
                     Należność należy wpłacić do dnia : {payment_deadline}
                     W przeciwnym razie zamówienie zostanie anulowane.
-                    ''', 'dawid.laskowski97@gmail.com', [str(request.user.email)])
+                    ''', 'dawid.laskowski97@gmail.com', [str(self.request.user.email)])
                 email.attach_file('Proforma.pdf')
                 email.send()
 
                 order.save()
-                return render(request, "index/order_complete.html", {})
+                return render(self.request, "index/order_complete.html", {})
             else:
                 print(form.errors)
                 messages.info(
-                    request, "Wypełnij wymagane pola")
+                    self.request, "Wypełnij wymagane pola")
                 return redirect("checkout")
 
         except ObjectDoesNotExist:
             messages.warning(
-                request, "Nie posiadasz żadnego aktywnego zamówienia")
-            return redirect("order_summary")
+                self.request, "Nie posiadasz żadnego aktywnego zamówienia")
+            return redirect("cart")
 
+@login_required
+def add_to_cart(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    try:
+        order_product = OrderProduct.objects.get(
+            product=product, user=request.user, ordered=False)
+    except ObjectDoesNotExist:
+        order_product = OrderProduct.objects.create(
+            product=product, user=request.user, ordered=False)
+    try:
+        order = Order.objects.get(user=request.user, ordered=False)
+        if order.products.filter(product__pk=product.pk).exists():
+            order_product.quantity += 1
+            order_product.save()
+            messages.info(request, "Zaaktualizowano ilość.")
+            return redirect("cart")
+        else:
+            order.products.add(order_product)
+            messages.info(request, "Dodano do koszyka.")
+            return redirect("cart")
+    except ObjectDoesNotExist:
+        ordered_date = timezone.now()
+        order = Order.objects.create(
+            user=request.user, ordered_date=ordered_date)
+        order.products.add(order_product)
+        messages.info(request, "Dodano do koszyka.")
+        return(redirect('cart'))
 
+@login_required
 def remove_from_cart(request, pk):
     product = get_object_or_404(Product, pk=pk)
     try:
@@ -226,7 +215,7 @@ def remove_from_cart(request, pk):
                 product=product, user=request.user, ordered=False)
             order.products.remove(order_product)
             messages.info(request, 'Produkt usunięty z koszyka')
-            return redirect('order_summary')
+            return redirect('cart')
         except ObjectDoesNotExist:
             messages.info(request, 'Koszyk jest pusty')
             return redirect('product_detail', pk=pk)
@@ -234,7 +223,7 @@ def remove_from_cart(request, pk):
         messages.info(request, 'Koszyk jest pusty')
         return redirect('product_detail', pk=pk)
 
-
+@login_required
 def remove_single_product_from_cart(request, pk):
     product = get_object_or_404(Product, pk=pk)
     try:
@@ -244,7 +233,6 @@ def remove_single_product_from_cart(request, pk):
         )
         if order.products.filter(product__pk=product.pk).exists():
             order_product = OrderProduct.objects.filter(
-                product=product,
                 user=request.user,
                 ordered=False
             )[0]
@@ -254,7 +242,7 @@ def remove_single_product_from_cart(request, pk):
             else:
                 order.products.remove(order_product)
             messages.info(request, 'Zaktualizowano ilość.')
-            return redirect('order_summary')
+            return redirect('cart')
         else:
             messages.info(request, 'Nie ma tego produktu w koszyku')
             return redirect('product_detail', pk=pk)
