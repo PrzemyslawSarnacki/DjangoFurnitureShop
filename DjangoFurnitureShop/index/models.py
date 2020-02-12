@@ -9,7 +9,7 @@ class Product(models.Model):
     description = models.CharField(max_length=200)
     created_date = models.DateTimeField(default=timezone.now)
     price = models.FloatField()
-    photo = models.ImageField(upload_to = 'media/', max_length=255, null=True, blank=True)
+    photo = models.ImageField(upload_to = 'media/', null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -36,13 +36,12 @@ class Comment(models.Model):
 	created_date = models.DateTimeField(default=timezone.now)
 	approved_comment = models.BooleanField(default=False)
 
+	def __str__(self):
+		return self.text
+
 	def approve(self):
 		self.approved_comment = True
 		self.save()
-
-
-	def __str__(self):
-		return self.text
 
 
 class OrderProduct(models.Model):

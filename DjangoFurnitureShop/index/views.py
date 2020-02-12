@@ -12,55 +12,48 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
 from django.core.mail import EmailMessage
 from . import generate_invoice
+from django.views.generic import ListView, DetailView, CreateView, UpdateView
 
 
-def product_list(request):
-    search_phrase = ''
-    search_manufacturer = ''
-    products = Product.objects.all()
-    users = User.objects.all()
-    if 'search' in request.GET:
-        products = Product.objects.all()
-        search_phrase = request.GET['search']
-        products = products.filter(manufacturer_id__username__icontains=search_phrase)
-        if products.first() == None:
-            products = Product.objects.all()
-            products = products.filter(name__icontains=search_phrase)
-    if 'search_manufacturer' in request.GET:
-        products = Product.objects.all()
-        search_manufacturer = request.GET['search_manufacturer']
-        products = products.filter(
-            manufacturer_id__username__icontains=search_manufacturer)
-    else:
-        paginator = Paginator(products, 3)
-        page = request.GET.get('page')
-        products = paginator.get_page(page)
-    context = {'products': products, 'users': users,
-               'search_phrase': search_phrase, 'search_manufacturer': search_manufacturer}
-    return render(request, 'index/product_list.html', context)
+class ProductListView(ListView):
+    model = Product
+    paginate_by = 3
+
+    def get_queryset(self):
+        search_phrase = self.request.GET.get('search')
+        # search_manufacturer = self.request.GET.get('search_manufacturer')
+        if search_phrase == None:
+            search_phrase = self.request.GET.get('search_manufacturer')
+            if search_phrase == None:
+                object_list = self.model.objects.all()
+            elif search_phrase != '':
+                object_list = self.model.objects.filter(
+                    manufacturer_id__username__icontains=search_phrase)
+            else:
+                object_list = self.model.objects.all()
+        elif search_phrase != '':
+            object_list = self.model.objects.filter(
+                name__icontains=search_phrase)
+        else:
+            object_list = self.model.objects.all()
+        return object_list
 
 
-def a_product_list(request, pk):
-    products = Product.objects.filter(manufacturer=pk)
-    return render(request, 'index/a_product_list.html', {'products': products})
+class ProductDetailView(DetailView):
+    model = Product
 
 
-def product_detail(request, pk):
-    product = get_object_or_404(Product, pk=pk)
-    return render(request, 'index/product_detail.html', {'product': product})
+class ProductCreateView(CreateView):
+    model = Product
+    template_name = 'index/new_product.html'
+    fields = ['name', 'description', 'price', 'photo']
 
-
-def new_product(request):
-    if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES)
-        if form.is_valid():
-            product = form.save(commit=False)
-            product.manufacturer = request.user
-            product.save()
-            return redirect('/')
-    else:
-        form = ProductForm()
-    return render(request, 'index/new_product.html', {'product': form})
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.manufacturer = self.request.user
+        obj.photo = form.cleaned_data['photo']
+        obj.save()
+        return redirect('/')
 
 
 def edit_product(request, pk):
@@ -83,6 +76,7 @@ def delete_product(request, pk):
     if request.method == 'POST':
         product.delete()
     return render(request, 'index/delete_product.html', {'product': product})
+
 
 def add_to_cart(request, pk):
     product = get_object_or_404(Product, pk=pk)

@@ -4,12 +4,6 @@ import datetime
 
 
 class ProductForm(forms.ModelForm):
-    name = forms.CharField(max_length=200)
-    # manufacturer = forms.ModelChoiceField(queryset=User.objects.all(), widget=forms.HiddenInput(), initial=User.objects.all()[0])
-
-    description = forms.CharField(max_length=200)
-    price = forms.FloatField()
-    photo = forms.ImageField(required=False, max_length=255)
 
     class Meta:
         model = Product
