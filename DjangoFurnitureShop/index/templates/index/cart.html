@@ -19,21 +19,23 @@
         </tr>
         </thead>
         <tbody>
-        {% for order_product in order %}
+        {% for product in order.products.all %}
         <tr>
             <th scope="row">{{ forloop.counter }}</th>
-            <td>{{ order_product.product.name }}</td>
-            <td>{{ order_product.product.price }} zł</td>
+            <td>{{ product.product.name }}</td>
+            <td>{{ product.product.price }} zł</td>
             <td>
-                <a href="{% url 'remove_single_product_from_cart' order_product.product.pk %}"><i class="fas fa-minus mr-2"></i></a>
-                {{ order_product.quantity }}
-                <a href="{% url 'add_to_cart' order_product.product.pk %}"><i class="fas fa-plus ml-2"></i></a>
+                <a href="{% url 'remove_single_product_from_cart' product.product.pk %}"><i class="fas fa-minus mr-2"></i></a>
+                {{ product.quantity }}
+                <a href="{% url 'add_to_cart' product.product.pk %}"><i class="fas fa-plus ml-2"></i></a>
             </td>
             <td>
-                {{ order_product.product.get_total_price }} zł
-            <a style='color: red;' href="{% url 'remove_from_cart' order_product.product.pk %}">
+                {{ product.get_total_price }} zł
                 <i class="fas fa-trash float-right"></i>
             </a>
+        </td>
+        <td>
+            <a href="{% url 'remove_from_cart' product.product.pk %}"><i class="fas fa-plus ml-2"></i></a>
             </td>
         </tr>
         {% empty %}

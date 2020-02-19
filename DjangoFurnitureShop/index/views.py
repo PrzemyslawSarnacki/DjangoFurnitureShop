@@ -67,17 +67,14 @@ class ProductDeleteView(LoginRequiredMixin, DeleteView):
 class CartView(LoginRequiredMixin, View):
     def get(self, *args, **kwargs):
         try:
-            order = OrderProduct.objects.filter(user=self.request.user, ordered=False)
-            for o in order:
-                print(o.quantity)
-
+            order = Order.objects.get(user=self.request.user, ordered=False)
             return render(self.request, 'index/cart.html', {'order': order})
         except ObjectDoesNotExist:
             messages.warning(self.request, "Nie masz aktywnego zamówienia !")
             return redirect("/")
 
 
-class CheckoutView(View, LoginRequiredMixin):
+class CheckoutView(LoginRequiredMixin, View):
     def get(self, *args, **kwargs):
         try:
             order = Order.objects.get(user=self.request.user, ordered=False)
@@ -151,7 +148,7 @@ class CheckoutView(View, LoginRequiredMixin):
                 order.shipping_address = shipping_address
                 order.ordered = True
                 order.payment_deadline = payment_deadline
-
+                print(f"{order.get_total()}")
                 email = EmailMessage('Potwierdzenie zamówienia',
                                      f''' To jest wiadomość wygenerowana automatycznie.
                     NIE ODPOWIADAJ NA OTRZYMANĄ WIADOMOŚĆ.
@@ -180,14 +177,15 @@ class CheckoutView(View, LoginRequiredMixin):
 @login_required
 def add_to_cart(request, pk):
     product = get_object_or_404(Product, pk=pk)
-    try:
-        order_product = OrderProduct.objects.get(
-            product=product, user=request.user, ordered=False)
-    except ObjectDoesNotExist:
-        order_product = OrderProduct.objects.create(
-            product=product, user=request.user, ordered=False)
-    try:
-        order = Order.objects.get(user=request.user, ordered=False)
+    order_product, created = OrderProduct.objects.get_or_create(
+        product=product,
+        user=request.user,
+        ordered=False
+    )
+    order_qs = Order.objects.filter(user=request.user, ordered=False)
+
+    if order_qs.exists():
+        order = order_qs[0]
         if order.products.filter(product__pk=product.pk).exists():
             order_product.quantity += 1
             order_product.save()
@@ -197,7 +195,7 @@ def add_to_cart(request, pk):
             order.products.add(order_product)
             messages.info(request, "Dodano do koszyka.")
             return redirect("cart")
-    except ObjectDoesNotExist:
+    else:
         ordered_date = timezone.now()
         order = Order.objects.create(
             user=request.user, ordered_date=ordered_date)
@@ -208,44 +206,52 @@ def add_to_cart(request, pk):
 @login_required
 def remove_from_cart(request, pk):
     product = get_object_or_404(Product, pk=pk)
-    try:
-        order = Order.objects.get(user=request.user, ordered=False)
-        try:
-            order_product = OrderProduct.objects.get(
-                product=product, user=request.user, ordered=False)
+    order_qs = Order.objects.filter(
+        user=request.user,
+        ordered=False
+    )
+    if order_qs.exists():
+        order = order_qs[0]
+        if order.products.filter(product__pk=product.pk).exists():
+            order_product = OrderProduct.objects.filter(
+                product=product, user=request.user, ordered=False)[0]
             order.products.remove(order_product)
+            order_product.delete()
             messages.info(request, 'Produkt usunięty z koszyka')
             return redirect('cart')
-        except ObjectDoesNotExist:
+        else:
             messages.info(request, 'Koszyk jest pusty')
             return redirect('product_detail', pk=pk)
-    except ObjectDoesNotExist:
+    else:
         messages.info(request, 'Koszyk jest pusty')
         return redirect('product_detail', pk=pk)
 
 @login_required
 def remove_single_product_from_cart(request, pk):
     product = get_object_or_404(Product, pk=pk)
-    try:
-        order = Order.objects.get(
-            user=request.user,
-            ordered=False
-        )
+    order_qs = Order.objects.filter(
+        user=request.user,
+        ordered=False
+    )
+    if order_qs.exists():
+        order = order_qs[0]
         if order.products.filter(product__pk=product.pk).exists():
             order_product = OrderProduct.objects.filter(
+                product=product,
                 user=request.user,
                 ordered=False
             )[0]
+
             if order_product.quantity > 1:
                 order_product.quantity -= 1
                 order_product.save()
             else:
-                order.products.remove(order_product)
+                order_product.remove(order_product)
             messages.info(request, 'Zaktualizowano ilość.')
             return redirect('cart')
         else:
             messages.info(request, 'Nie ma tego produktu w koszyku')
             return redirect('product_detail', pk=pk)
-    except ObjectDoesNotExist:
+    else:
         messages.info(request, 'Nie masz żadnego zamówienia')
         return redirect('product_detail', pk=pk)
