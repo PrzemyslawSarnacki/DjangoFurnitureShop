@@ -41,7 +41,7 @@
     {% endif %}
     
     {% for product in product_list %}
-    <article>
+    <article class="embed-responsive">
         <div class="product">
             <ul class="row">
 
@@ -69,7 +69,7 @@
     <hr class="mt-0 mb-2">
     {% endfor %}
     
-    <nav aria-label="Page navigation" class="pagination">
+    <nav aria-label="Page navigation" class="pagination table-responsive mb-2">
             <ul class="pagination pagination-sm flex-sm-wrap">
                 {% if page_obj.has_previous %}
                 <li class="page-item"><a class="page-link" href="?{{ request.GET.urlencode }}&page=1">&laquo; Pierwsza</a></li>
