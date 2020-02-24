@@ -15,7 +15,7 @@
         </div>
     </h6>
     {% if product.photo %}
-    <img src="{{ product.photo.url}}">
+    <img class="img-fluid" src="{{ product.photo.url}}">
     {% endif %}
     <p>{{ product.description|linebreaksbr }}</p>
     <b>
