@@ -4,7 +4,7 @@ Django==2.2.18
 django-crispy-forms==1.8.1
 django-filter==2.2.0
 django-filters==0.2.1
-Pillow==8.3.2
+Pillow==9.0.0
 pytz==2019.3
 qrcode==6.1
 qrplatba==0.3.4
